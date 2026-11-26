@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NestEgg — Household Budget Planner</title>
+<meta name="description" content="NestEgg is a household budget planner for one family: a monthly budget, every transaction, savings goals, reports and money-saving habits — all in one place, working offline.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Ccircle cx='24' cy='24' r='22' fill='%232f6f4f'/%3E%3Cellipse cx='24' cy='26' rx='7' ry='9' fill='%23e8a33d'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="topbar">
+  <a class="brand" href="#/dashboard">
+    <span class="brand-mark" aria-hidden="true">
+      <svg viewBox="0 0 48 48" width="40" height="40" role="img" aria-label="NestEgg logo">
+        <circle cx="24" cy="24" r="22" fill="#2f6f4f"/>
+        <path d="M12 28c0-7 5-12 12-12s12 5 12 12c0 4-5 7-12 7s-12-3-12-7z" fill="#f6ead2"/>
+        <ellipse cx="24" cy="26" rx="6.5" ry="8" fill="#e8a33d"/>
+        <path d="M18 20c2-2 4-3 6-3" stroke="#fff" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+      </svg>
+    </span>
+    <span class="brand-text"><span class="brand-name">NestEgg</span><span class="brand-tag">Household Budget Planner</span></span>
+  </a>
+  <nav class="main-nav" aria-label="Main navigation">
+    <a class="nav-link" data-page="dashboard" href="#/dashboard">Dashboard</a>
+    <a class="nav-link" data-page="budget" href="#/budget">Budget</a>
+    <a class="nav-link" data-page="transactions" href="#/transactions">Transactions</a>
+    <a class="nav-link" data-page="goals" href="#/goals">Goals</a>
+    <a class="nav-link" data-page="reports" href="#/reports">Reports</a>
+    <a class="nav-link" data-page="tips" href="#/tips">Tips</a>
+  </nav>
+</header>
+
+<main id="view" class="container"></main>
+
+<footer class="site-footer">
+  <div class="container footer-inner">
+    <div>
+      <strong>NestEgg</strong> — a household budget planner for the Whitfield family, November 2026.
+      Changes you make (new transactions, edited budgets, money added to goals) are saved in this browser only.
+    </div>
+    <div class="footer-actions">
+      <button class="btn" id="restore-sample">Restore sample data</button>
+      <span class="muted small" id="restore-msg"></span>
+    </div>
+  </div>
+  <p class="container small muted">NestEgg is a demo with sample figures for one fictional family. It is not financial advice.</p>
+</footer>
+
+<script src="data.js"></script>
+<script src="charts.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
