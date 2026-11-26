@@ -7,6 +7,29 @@ let state = loadState();
 let txFilterCategory = "all";
 let txSearch = "";
 
+// The greeting follows the time of day in the visitor's own browser.
+function greeting() {
+  const hour = new Date().getHours();
+  if (hour < 12) return "Good morning";
+  if (hour < 18) return "Good afternoon";
+  return "Good evening";
+}
+
+// One short confirmation line, shown above the page after an action that
+// changes the data (add, delete, save). It lives outside #view so a re-render
+// never wipes it; changing page clears it.
+function setNotice(message) {
+  const el = document.getElementById("notice");
+  if (!el) return;
+  el.textContent = message;
+  el.hidden = false;
+}
+
+function clearNotice() {
+  const el = document.getElementById("notice");
+  if (el) { el.textContent = ""; el.hidden = true; }
+}
+
 function esc(s) {
   return String(s).replace(/[&<>"']/g, (c) => ({
     "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
@@ -93,7 +116,7 @@ function viewDashboard() {
   return `
   <section class="page-head">
     <div>
-      <h1>Good evening, Whitfields 👋</h1>
+      <h1>${greeting()}, Whitfields 👋</h1>
       <p class="lede">${esc(state.family.note)} November is nearly done — here is where the household stands.</p>
     </div>
     <div class="month-chip">${esc(state.family.month)} · ${esc(state.family.members)}</div>
@@ -109,7 +132,7 @@ function viewDashboard() {
   <section class="grid-2">
     <div class="card">
       <h2>Where the money went</h2>
-      <canvas id="donut" class="donut" height="220" aria-label="Donut chart of spending by category"></canvas>
+      <canvas id="donut" class="donut" height="220" role="img" aria-label="Donut chart of spending by category"></canvas>
       <ul class="legend">
         ${CATEGORIES.filter((c) => c.id !== "income" && spent[c.id] > 0)
           .sort((a, b) => spent[b.id] - spent[a.id])
@@ -135,6 +158,7 @@ function viewDashboard() {
 
   <section class="card">
     <h2>Latest transactions</h2>
+    <div class="table-scroll">
     <table class="tx-table">
       <thead><tr><th>Date</th><th>What</th><th>Category</th><th class="num">Amount</th></tr></thead>
       <tbody>
@@ -146,12 +170,34 @@ function viewDashboard() {
         </tr>`).join("")}
       </tbody>
     </table>
+    </div>
     <p><a class="btn" href="#/transactions">See all ${state.transactions.length} transactions →</a></p>
   </section>`;
 }
 
-function ruleRow(label, actual, target, amount) {
-  const ok = label === "Savings" ? actual >= target - 5 : actual <= target + 5;
+// The budget tip is worked out from the live figures, never typed in:
+// it names the category furthest over its plan, or the tightest one when
+// nothing is over, so it stays true after any edit or new transaction.
+function budgetTip() {
+  const spent = spentByCategory(state);
+  const over = CATEGORIES.filter((c) => c.id !== "income" && (spent[c.id] || 0) > (state.planned[c.id] || 0))
+    .sort((a, b) => ((spent[b.id] || 0) - (state.planned[b.id] || 0)) - ((spent[a.id] || 0) - (state.planned[a.id] || 0)));
+  if (over.length > 0) {
+    const c = over[0];
+    const extra = (spent[c.id] || 0) - (state.planned[c.id] || 0);
+    const note = c.id === "clothing" ? " — the winter jackets did it." : " — look for one cut to make there.";
+    return `Tip: ${c.name} is ${money(extra)} over plan${note}`;
+  }
+  const tightest = CATEGORIES.filter((c) => c.id !== "income" && (state.planned[c.id] || 0) > 0)
+    .map((c) => ({ c, left: (state.planned[c.id] || 0) - (spent[c.id] || 0), pct: ((spent[c.id] || 0) / (state.planned[c.id] || 1)) * 100 }))
+    .sort((a, b) => a.left - b.left)[0];
+  if (tightest) {
+    return `Tip: every category is inside its plan — tightest is ${tightest.c.name} with ${money(tightest.left)} left (${tightest.pct.toFixed(0)}% used).`;
+  }
+  return "Tip: every category is inside its plan.";
+}
+
+function ruleRow(label, actual, target, amount) {  const ok = label === "Savings" ? actual >= target - 5 : actual <= target + 5;
   return `<div class="rule-row">
     <div class="rule-head"><span>${label} — ${actual.toFixed(1)}% of income <span class="muted">(target ${target}%)</span></span><b>${amount}</b></div>
     ${progressBar((actual / 60) * 100, ok ? "#2f6f4f" : "#c0563f")}
@@ -173,6 +219,7 @@ function viewBudget() {
   </section>
 
   <section class="card">
+    <div class="table-scroll">
     <table class="budget-table">
       <thead><tr><th>Category</th><th class="num">Planned</th><th class="num">Spent</th><th class="num">Left</th><th>Progress</th><th></th></tr></thead>
       <tbody>
@@ -194,9 +241,10 @@ function viewBudget() {
       <tr class="total-row"><td><b>Total</b></td><td class="num"><b>${money(plannedTotal)}</b></td><td class="num"><b>${money(spentTotal)}</b></td><td class="num"><b>${money(round2(plannedTotal - spentTotal))}</b></td><td colspan="2"></td></tr>
       </tbody>
     </table>
+    </div>
     <div class="actions">
       <button class="btn primary" id="save-budget">Save planned amounts</button>
-      <span class="muted" id="budget-msg">Tip: Clothing is ${money((spent.clothing || 0) - state.planned.clothing)} over plan — the winter jackets did it.</span>
+      <span class="muted" id="budget-msg">${budgetTip()}</span>
     </div>
   </section>
 
@@ -231,6 +279,7 @@ function viewTransactions() {
         <input type="search" id="tx-search" placeholder="Search a shop, person or note…" value="${esc(txSearch)}">
       </label>
     </div>
+    <div class="table-scroll">
     <table class="tx-table">
       <thead><tr><th>Date</th><th>What</th><th>Category</th><th>Note</th><th class="num">Amount</th><th></th></tr></thead>
       <tbody>
@@ -244,6 +293,7 @@ function viewTransactions() {
         </tr>`).join("")}
       </tbody>
     </table>
+    </div>
   </section>
 
   <section class="card">
@@ -342,13 +392,14 @@ function viewReports() {
 
   <section class="card">
     <h2>Income vs spending, last 6 months</h2>
-    <canvas id="income-bars" class="bars" height="260" aria-label="Bar chart of income versus spending for June to November 2026"></canvas>
+    <canvas id="income-bars" class="bars" height="260" role="img" aria-label="Bar chart of income versus spending for June to November 2026"></canvas>
     <p class="muted">November's bar is drawn from the transactions on this site — income ${money(income)}, spending ${money(spending)}.</p>
   </section>
 
   <section class="grid-2">
     <div class="card">
       <h2>Spending by category — November</h2>
+      <div class="table-scroll">
       <table class="tx-table">
         <thead><tr><th>Category</th><th class="num">Spent</th><th class="num">Share</th><th class="num">vs plan</th></tr></thead>
         <tbody>
@@ -361,6 +412,7 @@ function viewReports() {
           }).join("")}
         </tbody>
       </table>
+      </div>
     </div>
     <div class="card">
       <h2>What the numbers say</h2>
@@ -379,12 +431,17 @@ function viewReports() {
 // ---------- Tips ----------
 
 function viewTips() {
-  const totalMonthly = state.tips.reduce((s, t) => s + t.saving, 0);
+  // Only habits that cut spending free money; "Pay yourself first" moves
+  // money to savings instead, so it is counted apart and never double-counted.
+  const freedMonthly = state.tips.filter((t) => !t.movesToSavings)
+    .reduce((s, t) => s + t.saving, 0);
+  const autoSavings = state.tips.filter((t) => t.movesToSavings)
+    .reduce((s, t) => s + t.saving, 0);
   return `
   <section class="page-head">
     <div><h1>Money-saving habits</h1>
-    <p class="lede">Six habits this family actually uses, with the real dollars each one saves. Together they free about ${money0(totalMonthly)} a month — money that goes straight to the goals.</p></div>
-    <div class="month-chip">≈ ${money0(totalMonthly)} saved every month</div>
+    <p class="lede">Six habits this family actually uses, with the real dollars each one saves. Five of them free about ${money0(freedMonthly)} a month — money that goes straight to the goals — on top of the ${money0(autoSavings)} that leaves for savings on payday.</p></div>
+    <div class="month-chip">≈ ${money0(freedMonthly)} freed every month</div>
   </section>
 
   <section class="grid-2">
@@ -392,7 +449,7 @@ function viewTips() {
       <div class="tip-icon">${t.icon}</div>
       <h2>${esc(t.title)}</h2>
       <p>${esc(t.text)}</p>
-      <p class="tip-saving">Saves about <b>${money(t.saving)}/month</b></p>
+      <p class="tip-saving">${t.movesToSavings ? "Moves" : "Saves"} about <b>${money(t.saving)}/month</b>${t.movesToSavings ? " to savings" : ""}</p>
     </div>`).join("")}
   </section>
 
@@ -449,9 +506,11 @@ document.addEventListener("click", (e) => {
   const del = e.target.closest("[data-delete-tx]");
   if (del) {
     const id = Number(del.dataset.deleteTx);
+    const gone = state.transactions.find((t) => t.id === id);
     state.transactions = state.transactions.filter((t) => t.id !== id);
     saveState(state);
     render();
+    if (gone) setNotice(`Deleted “${gone.merchant}” (${money(Math.abs(gone.amount))}). The dashboard and budget already show the new totals.`);
     return;
   }
   if (e.target.id === "save-budget") {
@@ -495,6 +554,8 @@ document.addEventListener("submit", (e) => {
     });
     saveState(state);
     render();
+    const added = state.transactions[state.transactions.length - 1];
+    setNotice(`Added “${added.merchant}” — ${added.amount > 0 ? "+" : "−"}${money(Math.abs(added.amount))}. The dashboard and budget already include it.`);
   }
   if (form.id === "add-goal") {
     const fd = new FormData(form);
@@ -511,6 +572,8 @@ document.addEventListener("submit", (e) => {
     });
     saveState(state);
     render();
+    const created = state.goals[state.goals.length - 1];
+    setNotice(`Goal “${created.name}” created — target ${money(created.target)}, ${money(created.saved)} saved so far.`);
   }
   const goalForm = form.closest("[data-goal]");
   if (goalForm) {
@@ -532,9 +595,10 @@ document.addEventListener("submit", (e) => {
       });
       saveState(state);
       render();
+      setNotice(`Added ${money(amount)} to “${goal.name}” — now ${money(goal.saved)} of ${money(goal.target)} saved.`);
     }
   }
 });
 
-window.addEventListener("hashchange", render);
+window.addEventListener("hashchange", () => { clearNotice(); render(); });
 render();

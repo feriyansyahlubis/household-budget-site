@@ -12,11 +12,11 @@ It runs entirely offline from static files, on a desktop and on a phone, with no
 Six pages, all reached from the top navigation, all working:
 
 - **Dashboard** — income, spending, money left and savings rate for November 2026; a donut chart of spending by category; a 50/30/20 check; the closest savings goal; the latest transactions.
-- **Budget** — the monthly plan per category (planned vs spent vs left). Planned amounts are editable and saved; every total on the site updates.
+- **Budget** — the monthly plan per category (planned vs spent vs left). Planned amounts are editable and saved; every total on the site updates. The tip under the table is computed from the live figures — it names the category furthest over its plan, or the tightest one when nothing is over.
 - **Transactions** — all 41 November transactions, filterable by category and searchable by shop or person. Add a new transaction or delete one, and the dashboard and budget change immediately.
 - **Goals** — four savings goals with progress bars and finish dates computed from the monthly contribution. Add money to a goal, or create a new one.
 - **Reports** — income vs spending for June–November 2026 as a bar chart, a spending table by category, and insights calculated from the real data (biggest category, biggest single expense, over-budget categories, best month).
-- **Tips** — six money-saving habits this family actually uses, with real dollar savings, plus an interactive compound-growth calculator.
+- **Tips** — six money-saving habits this family actually uses, with real dollar savings: five habits free about $497 a month, on top of the $1,400 that moves to savings on payday, plus an interactive compound-growth calculator. Every action on the site (adding or deleting a transaction, adding money to a goal, creating a goal) shows a short confirmation, and wide tables scroll sideways on a phone instead of breaking the layout.
 
 All figures are one consistent set of sample data for November 2026: every page computes from the same transactions, so the numbers always agree. Changes are saved in the browser (localStorage); the footer has a "Restore sample data" button.
 

@@ -111,7 +111,7 @@ const SAMPLE_DATA = {
     { icon: "✂️", title: "Audit subscriptions twice a year", text: "In September we found two streaming services and a magazine app nobody had opened in months. Cancelling them freed $31.98 a month — $384 a year — for the vacation fund.", saving: 31.98 },
     { icon: "💡", title: "Switch off and turn down", text: "LED bulbs in every room and the thermostat one degree lower in winter trimmed our power bill by about $28 a month. The kids now race to switch lights off — the winner picks Friday's dinner.", saving: 28 },
     { icon: "🥪", title: "Pack lunch three days a week", text: "Daniel takes lunch from home on Mondays, Wednesdays and Fridays instead of buying it near the office. That is roughly $132 a month back in the budget, and the food is better.", saving: 132 },
-    { icon: "🔁", title: "Pay yourself first", text: "Savings leave the account the morning payday lands — $1,400 a month, before any spending happens. What we never see, we never miss, and the emergency fund grows on its own.", saving: 1400 },
+    { icon: "🔁", title: "Pay yourself first", text: "Savings leave the account the morning payday lands — $1,400 a month, before any spending happens. What we never see, we never miss, and the emergency fund grows on its own.", saving: 1400, movesToSavings: true },
   ],
 };
 

@@ -110,6 +110,9 @@ main.container { padding-top: 24px; padding-bottom: 32px; min-height: 60vh; }
 
 .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
 .grid-2 > .card { margin-bottom: 0; }
+/* Let grid items shrink below their content's width, so a wide table inside
+   a card scrolls inside its own wrapper instead of stretching the page on a phone. */
+.grid-2 > *, .stats > * { min-width: 0; }
 .grid-2 { margin-bottom: 20px; }
 
 .muted { color: var(--muted); }
@@ -150,6 +153,18 @@ main.container { padding-top: 24px; padding-bottom: 32px; min-height: 60vh; }
 .verdict { background: var(--green-soft); border-radius: 10px; padding: 10px 12px; }
 
 /* ---------- tables ---------- */
+
+.table-scroll { overflow-x: auto; }
+
+.notice {
+  background: var(--green-soft);
+  border: 1px solid #cfe0d4;
+  color: var(--green-dark);
+  border-radius: 10px;
+  padding: 10px 14px;
+  margin: 0 0 16px;
+  font-weight: 600;
+}
 
 table { width: 100%; border-collapse: collapse; font-size: 15px; }
 th, td { padding: 9px 8px; text-align: left; border-bottom: 1px solid var(--line); vertical-align: middle; }
